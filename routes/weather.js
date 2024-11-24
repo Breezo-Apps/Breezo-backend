@@ -1,10 +1,10 @@
 const mysql = require('mysql2/promise');
 
 const pool = mysql.createPool({
-    host: 'localhost', // Ganti sesuai dengan pengaturan MySQL Anda
-    user: 'root', // Ganti dengan username MySQL Anda
-    password: '', // Ganti dengan password MySQL Anda
-    database: 'brezzo', // Nama database
+    host: 'localhost', 
+    user: 'root', 
+    password: '', 
+    database: 'brezzo', 
 });
 
 const weatherRoutes = [{
@@ -12,7 +12,6 @@ const weatherRoutes = [{
     path: '/api/home/daily',
     handler: async(request, h) => {
         try {
-            // Query data dari database
             const [rows] = await pool.query('SELECT date, degree, degree_img FROM daily ORDER BY date ASC');
             return rows;
         } catch (err) {
