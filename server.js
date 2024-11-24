@@ -8,14 +8,13 @@ const init = async() => {
         host: 'localhost',
     });
 
-    // Tambahkan routes
+    // Routes
     server.route(weatherRoutes);
 
     await server.start();
     console.log(`Server running on ${server.info.uri}`);
 };
 
-// Start the server
 process.on('unhandledRejection', (err) => {
     console.log(err);
     process.exit(1);
