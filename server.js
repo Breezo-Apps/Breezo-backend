@@ -1,5 +1,7 @@
 const Hapi = require('@hapi/hapi');
 const weatherRoutes = require('./routes/weatherRoutes');
+const weatherRoutes = require('./routes/weather');
+
 
 const init = async () => {
     const server = Hapi.server({
@@ -19,3 +21,4 @@ process.on('unhandledRejection', (err) => {
 });
 
 init();
+
