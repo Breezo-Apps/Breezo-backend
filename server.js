@@ -8,11 +8,9 @@ const init = async() => {
         host: 'localhost',
     });
 
-    // Menambahkan routes
     server.route(weatherRoutes);
     server.route(dailyWeatherRoutes);
 
-    // Menjalankan server
     await server.start();
     console.log('Server running on %s', server.info.uri);
 };
