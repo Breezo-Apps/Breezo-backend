@@ -1,18 +1,20 @@
 const Hapi = require('@hapi/hapi');
 const weatherRoutes = require('./routes/weatherRoutes');
-const weatherRoutes = require('./routes/weather');
+const dailyWeatherRoutes = require('./cron/weather');
 
-
-const init = async () => {
+const init = async() => {
     const server = Hapi.server({
         port: 3000,
         host: 'localhost',
     });
 
+    // Menambahkan routes
     server.route(weatherRoutes);
+    server.route(dailyWeatherRoutes);
 
+    // Menjalankan server
     await server.start();
-    console.log(`Server running on ${server.info.uri}`);
+    console.log('Server running on %s', server.info.uri);
 };
 
 process.on('unhandledRejection', (err) => {
@@ -21,4 +23,3 @@ process.on('unhandledRejection', (err) => {
 });
 
 init();
-
