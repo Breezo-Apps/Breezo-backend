@@ -1,22 +1,24 @@
 {
-  "name": "api-breezo",
-  "version": "1.0.0",
-  "main": "server.js",
-  "scripts": {
-    "start": "node server.js"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "description": "",
-  "dependencies": {
-    "@hapi/hapi": "^21.3.12",
-    "@tensorflow/tfjs-node": "^4.22.0",
-    "axios": "^1.7.7",
-    "bcrypt": "^5.1.1",
-    "dotenv": "^16.4.5",
-    "jsonwebtoken": "^9.0.2",
-    "mysql2": "^3.11.4",
-    "node-cron": "^3.0.3"
-  }
+    "name": "api-breezo",
+    "version": "1.0.0",
+    "main": "server.js",
+    "scripts": {
+        "start": "node server.js"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "description": "",
+    "dependencies": {
+        "@hapi/hapi": "^21.3.12",
+        "@tensorflow/tfjs-node": "^4.22.0",
+        "axios": "^1.7.7",
+        "bcrypt": "^5.1.1",
+        "dotenv": "^16.4.5",
+        "jsonwebtoken": "^9.0.2",
+        "mysql2": "^3.11.4",
+        "node-cron": "^3.0.3",
+        "@google-cloud/storage": "^6.9.0",
+        "unzipper": "^0.10.11"
+    }
 }
