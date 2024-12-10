@@ -1,21 +1,26 @@
-const Hapi = require('@hapi/hapi');
-const weatherRoutes = require('./routes/weatherRoutes');
-const dailyWeatherRoutes = require('./cron/weather');
+const Hapi = require("@hapi/hapi");
+const dailyWeatherRoutes = require("./cron/weather");
+const aqiRoutes = require("./routes/aqiRoutes");
+const userRoutes = require("./routes/userRoutes");
+const dotenv = require("dotenv");
+dotenv.config();
 
 const init = async() => {
     const server = Hapi.server({
-        port: 3000,
-        host: 'localhost',
+        port: process.env.PORT,
+        host: process.env.HOST,
     });
 
-    server.route(weatherRoutes);
     server.route(dailyWeatherRoutes);
+    server.route(aqiRoutes);
+    server.route(userRoutes);
+
 
     await server.start();
-    console.log('Server running on %s', server.info.uri);
+    console.log("Server running on %s", server.info.uri);
 };
 
-process.on('unhandledRejection', (err) => {
+process.on("unhandledRejection", (err) => {
     console.error(err);
     process.exit(1);
 });

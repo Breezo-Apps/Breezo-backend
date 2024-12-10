@@ -1,10 +1,13 @@
-const mysql = require('mysql2');
+const mysql = require("mysql2/promise");
+const dotenv = require("dotenv");
+
+dotenv.config();
 
 const db = mysql.createPool({
-    host: 'localhost',
-    user: 'root',
-    password: 'root', 
-    database: 'breezo_db',
+    host: process.env.HOST_DB,
+    user: process.env.USER_DB,
+    password: "",
+    database: process.env.DATABASE_DB,
 });
 
 module.exports = db;
