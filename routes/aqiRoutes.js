@@ -1,5 +1,4 @@
 const aqiController = require("../controllers/aqiController");
-const mlController = require("../controllers/mlController");
 
 const aqiRoutes = [
   {
@@ -13,11 +12,6 @@ const aqiRoutes = [
     handler: aqiController.detail,
   },
   {
-    method: "GET",
-    path: "/aqi/prediction",
-    handler: aqiController.prediction,
-  },
-  {
     method: "POST",
     path: "/aqi/save-history",
     options: {
@@ -28,16 +22,6 @@ const aqiRoutes = [
       },
     },
     handler: aqiController.saveHistory,
-  },
-  {
-    method: "GET",
-    path: "/aqi/save-history-now",
-    handler: aqiController.saveHistoryNow,
-  },
-  {
-    method: "GET",
-    path: "/aqi/prediction2",
-    handler: mlController.prediction,
   },
 ];
 

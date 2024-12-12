@@ -1,14 +1,12 @@
 const db = require("../config/database");
 const axios = require("axios");
-const aqiIndex = require("../utils/aqiIndex");
 const cron = require("node-cron");
+const aqiIndex = require("../utils/aqiIndex");
 
 const aqiController = {
   home,
   detail,
-  prediction,
   saveHistory,
-  saveHistoryNow,
 };
 
 const lat = "-6.175110";
@@ -121,7 +119,7 @@ async function detail(request, h) {
       {
         aqi_index: aqiIndex("co", rawData.list[0].components.co / 1240),
         polutant_type: "co",
-        concentrate: rawData.list[0].components.co,
+        concentrate: rawData.list[0].components.co / 1240,
       },
       {
         aqi_index: aqiIndex("no2", rawData.list[0].components.no2),
@@ -158,94 +156,6 @@ async function detail(request, h) {
       main,
       detail,
     };
-
-    return h
-      .response({
-        status: {
-          code: 200,
-          message: "Success",
-        },
-        data: resData,
-      })
-      .code(200);
-  } catch (error) {
-    return h
-      .response({
-        status: {
-          code: 500,
-          message: error.message,
-        },
-      })
-      .code(500);
-  }
-}
-
-async function prediction(request, h) {
-  try {
-    const resData = [];
-    const totalHours = 48;
-    const startDate = new Date();
-
-    for (let i = 0; i < totalHours; i++) {
-      const currentDate = new Date(startDate);
-      currentDate.setHours(0, 0, 0, 0);
-      currentDate.setHours(i % 24);
-
-      const date = `${String(currentDate.getDate()).padStart(2, "0")}/${String(
-        currentDate.getMonth() + 1
-      ).padStart(2, "0")}/${currentDate.getFullYear()}`;
-      const time = `${String(currentDate.getHours()).padStart(2, "0")}:00`;
-
-      const detail = [
-        {
-          aqi_index: Math.floor(Math.random() * 50),
-          polutant_type: "co",
-          concentrate: (Math.random() * 1500).toFixed(2),
-        },
-        {
-          aqi_index: Math.floor(Math.random() * 50),
-          polutant_type: "no2",
-          concentrate: (Math.random() * 50).toFixed(2),
-        },
-        {
-          aqi_index: Math.floor(Math.random() * 50),
-          polutant_type: "o3",
-          concentrate: (Math.random() * 50).toFixed(2),
-        },
-        {
-          aqi_index: Math.floor(Math.random() * 50),
-          polutant_type: "so2",
-          concentrate: (Math.random() * 20).toFixed(2),
-        },
-        {
-          aqi_index: Math.floor(Math.random() * 50),
-          polutant_type: "pm2.5",
-          concentrate: (Math.random() * 50).toFixed(2),
-        },
-        {
-          aqi_index: Math.floor(Math.random() * 50),
-          polutant_type: "pm10",
-          concentrate: (Math.random() * 100).toFixed(2),
-        },
-      ];
-
-      const main = detail.reduce((max, item) =>
-        item.aqi_index > max.aqi_index ? item : max
-      );
-
-      const hourlyData = {
-        date,
-        time,
-        main_polutant: {
-          aqi_index: main.aqi_index,
-          polutant_type: main.polutant_type,
-          concentrate: main.concentrate,
-        },
-        detail,
-      };
-
-      resData.push(hourlyData);
-    }
 
     return h
       .response({
@@ -332,116 +242,6 @@ async function saveHistory(request, h) {
   }
 }
 
-async function saveHistoryNow(request, h) {
-  try {
-    const currentDate = new Date();
-    currentDate.setMinutes(0, 0, 0);
-
-    const end = Math.floor(currentDate.getTime() / 1000);
-    const start = end;
-
-    const weather = await axios.get(
-      `https://api.openweathermap.org/data/2.5/air_pollution/history?lat=${lat}&lon=${lon}&start=${start}&end=${end}&appid=${key}`
-    );
-
-    if (!weather.data.list || weather.data.list.length === 0) {
-      throw new Error(
-        'Data "list" tidak ditemukan atau kosong pada response API'
-      );
-    }
-
-    const item = weather.data.list[0];
-    const dt = item.dt;
-    const date = new Date(dt * 1000);
-    date.setHours(date.getHours() + 7);
-    const formattedDate = date.toISOString().slice(0, 19).replace("T", " ");
-    console.log(formattedDate);
-
-    const { co, no2, o3, so2, pm2_5, pm10 } = item.components;
-
-    const checkQuery = `
-      SELECT COUNT(*) AS count
-      FROM aqi_daily
-      WHERE date = ?
-    `;
-    const dataExists = await new Promise((resolve, reject) => {
-      db.execute(checkQuery, [formattedDate], (err, results) => {
-        if (err) {
-          reject(new Error("Database query failed during data check."));
-        } else {
-          resolve(results[0].count > 0);
-        }
-      });
-    });
-
-    if (!dataExists) {
-      const insertQuery = `
-        INSERT INTO aqi_daily (date, co, no2, o3, so2, pm2_5, pm10)
-        VALUES (?, ?, ?, ?, ?, ?, ?)
-      `;
-      await new Promise((resolve, reject) => {
-        db.execute(
-          insertQuery,
-          [formattedDate, co, no2, o3, so2, pm2_5, pm10],
-          (err, results) => {
-            if (err) {
-              reject(new Error("Database query failed during data insertion."));
-            } else {
-              resolve(results);
-            }
-          }
-        );
-      });
-    } else {
-      return h
-        .response({
-          status: {
-            code: 401,
-            message: `Data for date ${formattedDate} already exists in the database.`,
-          },
-        })
-        .code(401);
-    }
-    const responseData = {
-      coord: {
-        lon,
-        lat,
-      },
-      main: {
-        aqi: item.main.aqi,
-      },
-      components: {
-        co,
-        no2,
-        o3,
-        so2,
-        pm2_5,
-        pm10,
-      },
-      dt,
-    };
-
-    return h
-      .response({
-        status: {
-          code: 200,
-          message: "Success",
-        },
-        data: responseData,
-      })
-      .code(200);
-  } catch (error) {
-    return h
-      .response({
-        status: {
-          code: 500,
-          message: error.message,
-        },
-      })
-      .code(500);
-  }
-}
-
 async function saveHistoryCron() {
   try {
     const currentDate = new Date();
@@ -473,7 +273,7 @@ async function saveHistoryCron() {
       SELECT COUNT(*) AS count
       FROM aqi_daily
       WHERE date = ?
-    `;
+      `;
 
     const dataExists = await new Promise((resolve, reject) => {
       db.execute(checkQuery, [formattedDate], (err, results) => {
@@ -498,8 +298,8 @@ async function saveHistoryCron() {
     );
 
     const insertQuery = `
-      INSERT INTO aqi_daily (date, co, no2, o3, so2, pm2_5, pm10)
-      VALUES (?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO aqi_daily (date, co, no2, o3, so2, pm2_5, pm10)
+    VALUES (?, ?, ?, ?, ?, ?, ?)
     `;
 
     await new Promise((resolve, reject) => {
